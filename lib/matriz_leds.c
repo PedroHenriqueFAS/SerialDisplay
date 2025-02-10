@@ -13,7 +13,7 @@
 #define OUT_PIN 27
 
 // Gera o binário que controla a cor de cada célula do LED
-//rotina para definição da intensidade de cores do led
+// Rotina para definição da intensidade de cores do LED
 uint32_t gerar_binario_cor(double red, double green, double blue)
 {
   unsigned char RED, GREEN, BLUE;
@@ -23,6 +23,7 @@ uint32_t gerar_binario_cor(double red, double green, double blue)
   return (GREEN << 24) | (RED << 16) | (BLUE << 8);
 }
 
+// Configura a matriz de LEDs e inicializa a PIO
 uint configurar_matriz(PIO pio, uint8_t pin){
     bool ok;
 
@@ -35,7 +36,7 @@ uint configurar_matriz(PIO pio, uint8_t pin){
     printf("iniciando a transmissão PIO");
     if (ok) printf("clock set to %ld\n", clock_get_hz(clk_sys));
 
-    //configurações da PIO
+    // Configurações da PIO
     uint offset = pio_add_program(pio, &pio_matrix_program);
     uint sm = pio_claim_unused_sm(pio, true);
     pio_matrix_program_init(pio, sm, offset, pin);
@@ -43,6 +44,7 @@ uint configurar_matriz(PIO pio, uint8_t pin){
     return sm;
 }
 
+// Envia os dados para a matriz de LEDs e imprime o desenho
 void imprimir_desenho(Matriz_leds_config configuracao, PIO pio, uint sm){
     for (int contadorLinha = 4; contadorLinha >= 0; contadorLinha--){
         if(contadorLinha % 2){
@@ -52,7 +54,6 @@ void imprimir_desenho(Matriz_leds_config configuracao, PIO pio, uint sm){
                     configuracao[contadorLinha][contadorColuna].green,
                     configuracao[contadorLinha][contadorColuna].blue
                 );
-
                 pio_sm_put_blocking(pio, sm, valor_cor_binario);
             }
         }else{
@@ -62,19 +63,19 @@ void imprimir_desenho(Matriz_leds_config configuracao, PIO pio, uint sm){
                     configuracao[contadorLinha][contadorColuna].green,
                     configuracao[contadorLinha][contadorColuna].blue
                 );
-
                 pio_sm_put_blocking(pio, sm, valor_cor_binario);
             }
         }
     }
 }
 
+// Obtém a cor RGB a partir dos valores fornecidos
 RGB_cod obter_cor_por_parametro_RGB(int red, int green, int blue){
     RGB_cod cor_customizada = {red/255.0,green/255.0,blue/255.0};
-
     return cor_customizada;
 }
 
+// Converte uma animação em hexadecimal para RGB
 void hex_to_rgb(uint32_t hex_animation[][25], rgb_led rgb_data[][25], uint8_t frames) {
     for(int frame = 0; frame < frames; frame++) {
         for (int j = 0; j < 25; j++) {
@@ -86,6 +87,7 @@ void hex_to_rgb(uint32_t hex_animation[][25], rgb_led rgb_data[][25], uint8_t fr
     }   
 }
 
+// Ajusta o brilho da matriz de LEDs
 void ajustar_brilho(rgb_led matriz[][25], float brightness, uint8_t frames) {
     for (int i = 0; i < frames; i++) {
         for (int j = 0; j < 5 * 5; j++) {
@@ -96,6 +98,7 @@ void ajustar_brilho(rgb_led matriz[][25], float brightness, uint8_t frames) {
     }
 }
 
+// Converte matriz RGB para matriz de LEDs
 void converter_RGB_para_matriz_leds(rgb_led matriz[5][5], Matriz_leds_config matriz_leds) {
     for (int linha = 0; linha < 5; linha++) {
         for (int coluna = 0; coluna < 5; coluna++) {
@@ -106,6 +109,7 @@ void converter_RGB_para_matriz_leds(rgb_led matriz[5][5], Matriz_leds_config mat
     }
 }
 
+// Envia uma animação para a matriz de LEDs
 void enviar_animacao(rgb_led matriz[][25], PIO pio, uint sm, uint8_t frames) {
     Matriz_leds_config matriz_leds;
     rgb_led raw_matrix[5][5];
@@ -122,6 +126,7 @@ void enviar_animacao(rgb_led matriz[][25], PIO pio, uint sm, uint8_t frames) {
     }
 }
 
+// Limpa a matriz de LEDs
 void limpar_matriz(PIO pio, uint sm) {
     Matriz_leds_config matriz;
     for(int i = 0; i < 5; i++) {
